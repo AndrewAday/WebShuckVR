@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { VRButton } from 'three/addons/webxr/VRButton.js';
+import { VRButton } from 'three/examples/jsm/webxr/VRButton';
+// import { VRButton } from 'three/addons/webxr/VRButton.js';
 
 import * as dat from 'lil-gui';
 import Experience from './Experience.js';

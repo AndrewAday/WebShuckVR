@@ -4,10 +4,12 @@ import Time from './Utils/Time';
 import Camera from './Camera';
 import Renderer from './Renderer';
 import World from './World';
+import AudioManager from './AudioManager';
 
 import * as THREE from 'three';
 import * as dat from 'lil-gui';
-import { VRButton } from 'three/addons/webxr/VRButton.js';
+// import { VRButton } from 'three/addons/webxr/VRButton.js';
+import { VRButton } from 'three/examples/jsm/webxr/VRButton';
 import Stats from 'three/examples/jsm/libs/stats.module';
 
 // TODO: migrate to use https://threejs.org/docs/index.html?q=event#api/en/core/EventDispatcher
@@ -24,6 +26,7 @@ export default class Experience {
 	static debug?: dat.GUI;
 	XREnabled = true;
 	stats: Stats;
+	audioMan?: AudioManager;
 
 	// static i;
 	constructor( canvas: HTMLElement ) {
@@ -57,6 +60,16 @@ export default class Experience {
 
 
 		this.world = new World( this.scene );
+
+		// Audio setup
+		// TODO: want to dynamically attach to correct camera
+		// can only trigger audio on user interaction
+		this.canvas.addEventListener( 'click', ( e ) => {
+
+			this.audioMan = new AudioManager( this.getActiveCamera() );
+
+		}, { once: true } );
+
 
 		// event listeners
 		this.sizes.on( 'resize', this.resize.bind( this ) );
@@ -101,6 +114,20 @@ export default class Experience {
 
 	}
 
+	getActiveCamera(): THREE.Camera {
+
+		if ( this.renderer.instance.xr.isPresenting ) {
+
+			return this.renderer.instance.xr.getCamera();
+
+		} else {
+
+			return this.camera.instance;
+
+		}
+
+	}
+
 	resize( width, height, pixelRatio ) {
 
 		console.log( 'resize detected!' );
@@ -117,18 +144,49 @@ export default class Experience {
 		console.assert( this.XREnabled === true, `should not be running this xrUpdate() loop when XREnabled = ${this.XREnabled}` );
 		console.log( 'xrupdate()' );
 
+
+
+
 		// get camera quat and position
 		const camera = this.renderer.instance.xr.getCamera();
 		const pos = camera.position;
 		const quat = camera.quaternion.clone().invert();
 
 		// TODO: try using arraycamera to update shader uniforms for virtualcamerapos and rot
+
 		// add virtual camera, controllers to dolly
+		// add mesh as child to camera
+		// implement flying by moving the entire dolly, and
+		// reporting camera global position to shader uniform
+
 		// make camera parent of the shader mesh
 		// resize mesh dynamically when re-parenting to fill screen
 		// in shader, compute ray origin as sum localCamerapos + virtualCameraPos
 		// should be ok since one will always be constant
 		// do same for rotation
+
+		// update virtual camera pos
+		const shaderUniforms = this.world.shaderMan.uniforms;
+		shaderUniforms.iVirtualCameraPos.value = pos;
+		shaderUniforms.iVirtualCameraQuat.value = quat;
+
+		// console.log( `Ivirtualcamerapos:` );
+		// console.log( pos );
+		// console.log( `Ivirtualcameraquat: ${quat}` );
+		// console.log( quat );
+
+		// update audio data texture
+		if ( this.audioMan !== undefined ) {
+
+			this.audioMan?.update();
+			console.log( "updateing audio text" );
+			shaderUniforms.iAudioTexture.value = this.audioMan.audioTexture;
+
+		}
+
+		console.log( this.world.mesh.material );
+
+
 
 
 		this.stats.update();

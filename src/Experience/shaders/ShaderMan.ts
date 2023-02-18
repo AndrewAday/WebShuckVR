@@ -2,7 +2,9 @@
 
 import * as THREE from 'three';
 import * as dat from 'lil-gui';
+import vertexShader from './default/vertex.glsl';
 import fragmentShader from './test3D/test3D.frag.glsl';
+import audioFragmentShader from './sound2D/sound2D.frag.glsl';
 import { FlyControls } from 'three/examples/jsm/controls/FlyControls';
 import Experience from '../Experience';
 
@@ -24,12 +26,17 @@ export default class ShaderMan {
 				window.innerWidth, window.innerHeight, window.devicePixelRatio
 			) },
 			iCameraPos: { value: new THREE.Vector3() },
-			iCameraQuat: { value: new THREE.Vector4() }
+			iCameraQuat: { value: new THREE.Vector4() },
+			iVirtualCameraPos: { value: new THREE.Vector3() },
+			iVirtualCameraQuat: { value: new THREE.Vector4() },
+			iAudioTexture: { value: new THREE.Texture() },
+			iFlagTexture: { value: new THREE.Texture() }
 		};
 
 		this.shaderMat = new THREE.ShaderMaterial( {
-			// verteaShader,
-			fragmentShader: fragmentShader,
+			vertexShader,
+			// fragmentShader: fragmentShader,
+			fragmentShader: audioFragmentShader,
 			uniforms: this.uniforms
 		} );
 
@@ -38,6 +45,11 @@ export default class ShaderMan {
 		this.controls.movementSpeed = 5;
 		this.controls.rollSpeed = Math.PI / 24;
 		this.controls.dragToLook = true;
+
+		// flag texture to debug
+		const textureLoader = new THREE.TextureLoader();
+		const flagTexture = textureLoader.load( './textures/uv-check.png' );
+		this.uniforms.iFlagTexture.value = flagTexture;
 
 		this.setDebug();
 

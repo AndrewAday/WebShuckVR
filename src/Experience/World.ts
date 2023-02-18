@@ -19,13 +19,14 @@ export default class World {
 
 		this.mesh.onBeforeRender = ( renderer, scene, camera, geometry, material, group ) => {
 
-			console.log( camera );
+			// console.log( camera );
 
 			this.shaderMan.update( Experience.i.time.elapsed, Experience.i.time.delta );
 
 		};
 
 		scene.add( this.mesh );
+		this.mesh.position.set( 0, 0, 0 );
 
 	}
 
