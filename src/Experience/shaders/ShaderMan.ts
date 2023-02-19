@@ -34,7 +34,7 @@ export default class ShaderMan {
 		};
 
 		this.shaderMat = new THREE.ShaderMaterial( {
-			vertexShader,
+			vertexShader, // need to use varying UVs passed from vertex shader. for some reason gl_fragcoord doesn't line up right...
 			// fragmentShader: fragmentShader,
 			fragmentShader: audioFragmentShader,
 			uniforms: this.uniforms
