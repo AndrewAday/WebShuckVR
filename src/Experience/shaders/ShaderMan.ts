@@ -116,6 +116,11 @@ export default class ShaderMan {
 		this.uniforms.iCameraQuat.value = this.controls.object.quaternion.clone().invert();
 		this.controls.update( deltaTime );
 
+		// update window resolution
+		this.uniforms.iResolution.value = new THREE.Vector3(
+			window.innerWidth, window.innerHeight, window.devicePixelRatio
+		),
+
 		// update shader-specific params
 		this.activeShader.updateUniforms( this.uniforms );
 

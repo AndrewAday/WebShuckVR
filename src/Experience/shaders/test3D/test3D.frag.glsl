@@ -242,7 +242,8 @@ vec3 rotate_vector( vec4 quat, vec3 vec) {
 }
 
 void main() {  // if you want procedural textures, just pass UVs from default frag shader, and don't scale by screen resolution
-  vec2 uv = (gl_FragCoord.xy-.5*iResolution.xy)/iResolution.y;
+  // vec2 uv = (gl_FragCoord.xy-.5*iResolution.xy)/iResolution.y;
+  vec2 uv = (vUv - .5) * iResolution.xy / iResolution.y;
   vec3 rd = rotate_vector(iCameraQuat, normalize(vec3(uv, -1))); // ray direction
   vec3 ro = iCameraPos;
   mainImage(gl_FragColor, gl_FragCoord.xy, ro, rd);

@@ -71,12 +71,11 @@ export default class Camera {
 
 			// TODO also need to resize shader geometry
 
-			console.log( 'ortho resize' );
-
-			const aspect = width / height;
-			this.instance.left = - aspect;
-			this.instance.right = aspect;
-			this.instance.updateProjectionMatrix();
+			// don't do this, just update the iResolution uniform.
+			// const aspect = width / height;
+			// this.instance.left = - aspect;
+			// this.instance.right = aspect;
+			// this.instance.updateProjectionMatrix();
 
 		}
 
