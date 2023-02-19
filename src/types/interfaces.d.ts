@@ -11,3 +11,5 @@ as long as it doesn't get used more than once
 interface TestInterface {
     number: string;
 }
+
+type ShaderUniforms = THREE.ShaderMaterialParameters[ 'uniforms' ];

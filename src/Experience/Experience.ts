@@ -27,6 +27,7 @@ export default class Experience {
 	XREnabled = true;
 	stats: Stats;
 	audioMan?: AudioManager;
+	urlParams: URLSearchParams;
 
 	// static i;
 	constructor( canvas: HTMLElement ) {
@@ -36,6 +37,9 @@ export default class Experience {
 			return Experience.i;
 
 		Experience.i = this;
+
+		// get url params
+		this.urlParams = new URLSearchParams( window.location.search );
 
 		// window is the global javascript context. window is implicit. document is a field of window.
 		// window.experience = this; // quality of life, allow access from debug console
@@ -142,7 +146,7 @@ export default class Experience {
 	xrUpdate( time: DOMHighResTimeStamp, frame: XRFrame ) { // game loop for XR mode
 
 		console.assert( this.XREnabled === true, `should not be running this xrUpdate() loop when XREnabled = ${this.XREnabled}` );
-		console.log( 'xrupdate()' );
+		// console.log( 'xrupdate()' );
 
 
 
@@ -181,10 +185,11 @@ export default class Experience {
 			this.audioMan?.update();
 			console.log( "updateing audio text" );
 			shaderUniforms.iAudioTexture.value = this.audioMan.audioTexture;
+			shaderUniforms.iVolume.value = this.audioMan.volume;
 
 		}
 
-		console.log( this.world.mesh.material );
+		// console.log( this.world.mesh.material );
 
 
 

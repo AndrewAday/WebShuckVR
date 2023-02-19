@@ -10,14 +10,15 @@ varying vec2 vUv;
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
     // Normalized pixel coordinates (from 0 to 1)
-    vec2 uv = fragCoord/iResolution.xy;
+    // vec2 uv = fragCoord/iResolution.xy;
+    vec2 uv = vUv;
  
     // Time varying pixel color
     vec3 col = 0.5 + 0.5*cos(iTime+uv.xyx+vec3(0,2,4));
  
     // Output to screen
-    fragColor = vec4(uv, 0.0, 1.0);
-    // fragColor = vec4(col,1.0);
+    // fragColor = vec4(uv, 0.0, 1.0);
+    fragColor = vec4(col,1.0);
 }
  
 void main() {  // if you want procedural textures, just pass UVs from default frag shader

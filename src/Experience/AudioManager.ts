@@ -120,7 +120,7 @@ export default class AudioManager {
 		// ... then take the square root of the sum.
 		// + remap back to 8bit [0, 255]
 		// adding extra math.sqrt to get larger values. jank.
-		const rms = Math.sqrt( Math.sqrt( ( sum / waveform.length ) ) ) * 255;
+		const rms = ( Math.sqrt( ( sum / waveform.length ) ) ) * 255;
 
 		return rms;
 
@@ -134,10 +134,7 @@ export default class AudioManager {
 		// to the previous sample - take the max here because we
 		// want "fast attack, slow release."
 		const rms = this.getAmplitude( this.waveform );
-		// console.log( rms );
 		this.volume = Math.max( this.getAmplitude( this.waveform ), this.volume * this.smoothing );
-		console.log( this.volume );
-		// console.log( this.waveform );
 
 		// insert into ring buffer
 		this.amplitudeHistory[ this._ampHistTail ] = this.volume;
@@ -174,9 +171,10 @@ export default class AudioManager {
 		}
 
 		// used the buffer to create a DataTexture
+		this.audioTexture.dispose(); // free last texture
 		this.audioTexture = new THREE.DataTexture( this.rawDataArray, this.width, this.height );
-		this.audioTexture.needsUpdate = true;
 		// this.audioTexture.source.data = this.rawDataArray;
+		this.audioTexture.needsUpdate = true;
 
 		// console.log( this.amplitudeHistory );
 
@@ -191,10 +189,16 @@ export default class AudioManager {
 
 		const debugObj = {
 			volume: this.out.getVolume(),
-			playbackRate: this.out.getPlaybackRate()
+			playbackRate: this.out.getPlaybackRate(),
+			amplitudeSmoothing: 0
 		};
 
 		this.debugFolder = Experience.debug.addFolder( "AudioManager" );
+		this.debugFolder.add( debugObj, 'amplitudeSmoothing' ).min( 0 ).max( 1.0 ).step( .001 ).onChange( ( v:number ) => {
+
+			this.smoothing = Math.pow( v, .1 );
+
+		} );
 		this.debugFolder.add( debugObj, 'volume' ).min( 0 ).max( 2.0 ).step( .01 ).onChange( ( v: number ) => {
 
 			this.out.setVolume( v );

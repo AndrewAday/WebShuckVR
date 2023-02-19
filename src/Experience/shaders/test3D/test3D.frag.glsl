@@ -2,6 +2,11 @@ uniform vec3 iResolution;
 uniform float iTime;
 uniform vec3 iCameraPos;
 uniform vec4 iCameraQuat;
+uniform sampler2D iAudioTexture;
+uniform float iVolume;
+uniform float iVolScale;
+uniform float iVolDisplace;
+
 
 varying vec2 vUv;
 
@@ -61,15 +66,21 @@ float opSmoothSubtract(float d1, float d2, float k) {
 /*============Domain Repetition=============*/
 
 
+// UNIFORMS
+uniform int MAX_MARCHING_STEPS;
+uniform float MAX_DIST;
+uniform vec3 COLOR_AMBIENT;
+uniform vec3 COLOR_BACKGROUND;
 
-const int MAX_MARCHING_STEPS = 155;
+// const vec3 COLOR_BACKGROUND = vec3(.741, .675, .82);
+// const vec3 COLOR_AMBIENT = vec3(0.42, 0.20, 0.1);
+
+// CONSTANTS
 const float MIN_DIST = 0.0;
-const float MAX_DIST = 250.0;
 const float PRECISION = 0.001;
 const float EPSILON = 0.0005;
 const float PI = 3.14159265359;
-const vec3 COLOR_BACKGROUND = vec3(.741, .675, .82);
-const vec3 COLOR_AMBIENT = vec3(0.42, 0.20, 0.1);
+
 
 mat2 rotate2d(float theta) {
   float s = sin(theta), c = cos(theta);
@@ -78,8 +89,10 @@ mat2 rotate2d(float theta) {
 
 
 float sdSphere(vec3 p, float r, vec3 offset)
-{
-  return length(p - offset) - r;
+{ 
+  // hack to scale radius with volume
+  float radius = r + iVolume * iVolScale;
+  return length(p - offset) - radius;
 }
 
 float opSymXSphere(vec3 p, float r, vec3 o)
@@ -88,16 +101,31 @@ float opSymXSphere(vec3 p, float r, vec3 o)
   return sdSphere(p, r, o);
 }
 
+
+// perturb sdf
+float opDisplace(vec3 p, float r, vec3 o)
+{
+  float d1 = sdSphere(p, r, o);
+  float d2 = 3.0 * sin(p.x)*sin(p.y)*sin(p.z) * cos(iTime) * iVolume * iVolDisplace;
+  return d1 + d2;
+}
+
 // this shit works with lighting too!!!
 float opRep( in vec3 p, in vec3 c )
 {
     vec3 q = mod(p+0.5*c,c)-0.5*c;
-    return sdSphere( q, 1.0, vec3(0.0) );
+    // return sdSphere( q, 1.0, vec3(0.0) );
+    return opDisplace( q, 1.0, vec3(0.0) );
 }
 
+
 float scene(vec3 p) {
-  float d1 = sdSphere(p, 1., vec3(0, 0, 0));
-  float d2 = sdSphere(p, 1., vec3(0, 1.5, 0));
+  // float d1 = sdSphere(p, 1., vec3(0, 0, 0));
+  // float d2 = sdSphere(p, 1., vec3(0, 1.5, 0));
+
+  float d1 = opDisplace(p, 1., vec3(0, 0, 0));
+  float d2 = opDisplace(p, 1., vec3(0, 1.5, 0));
+
   float d3 = opSymXSphere(p, 1.0, vec3(1, -1, 0));
   
   float d = opUnion(d2, d1);
@@ -164,7 +192,12 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord, in vec3 fragRayOri, in ve
 {
   // get uv in range [-0.5, 0.5] with 0,0 at center of screen
   // scaled by viewport aspect ratio
-  vec2 uv = (fragCoord-.5*iResolution.xy)/iResolution.y;
+  // vec2 uv = (fragCoord-.5*iResolution.xy)/iResolution.y;
+  vec2 uv = vUv - 0.5;
+
+  // the sound texture is 512x1
+  int tx = int(uv.x*512.0);
+    
   
   vec3 col = vec3(0);
   vec3 lp = vec3(0);  // lookat point

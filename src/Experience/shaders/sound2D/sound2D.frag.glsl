@@ -3,7 +3,6 @@
 uniform vec3 iResolution;
 uniform float iTime;
 uniform sampler2D iAudioTexture;
-uniform sampler2D iFlagTexture;
 
 varying vec2 vUv;
 

@@ -14,7 +14,19 @@ export default class World {
 		this.scene = scene; // threejs scene
 
 		const geometry = new THREE.PlaneGeometry( 2, 2, 1, 1 );
-		this.shaderMan = new ShaderMan( Experience.i.canvas );
+
+		console.log( Experience.i.urlParams );
+
+		if ( Experience.i.urlParams.has( 'shader' ) ) {
+
+			this.shaderMan = new ShaderMan( Experience.i.canvas, Experience.i.urlParams.get( 'shader' ) );
+
+		} else {
+
+			this.shaderMan = new ShaderMan( Experience.i.canvas );
+
+		}
+
 		this.mesh = new THREE.Mesh( geometry, this.shaderMan.shaderMat );
 
 		this.mesh.onBeforeRender = ( renderer, scene, camera, geometry, material, group ) => {
